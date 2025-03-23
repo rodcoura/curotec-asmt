@@ -10,17 +10,17 @@ namespace Asmt.DAL.Interfaces
         /// <summary>
         /// Gets the unique identifier of the entity.
         /// </summary>
-        int Id { get; init; }
+        int Id { get; set; }
 
         /// <summary>
         /// Gets the date and time when the entity was created.
         /// </summary>
-        DateTime CreateDT { get; init; }
+        DateTime CreateDT { get; set; }
 
         /// <summary>
         /// Gets the date and time when the entity was last updated.
         /// If null, the entity has never been updated.
         /// </summary>
-        DateTime? UpdateDT { get; init; }
+        DateTime? UpdateDT { get; set; }
     }
 }

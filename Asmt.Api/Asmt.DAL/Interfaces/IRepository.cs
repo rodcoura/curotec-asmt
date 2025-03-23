@@ -19,11 +19,13 @@ public interface IRepository<T> where T : IAtom
     /// <summary>
     /// Retrieves a filtered collection of entities asynchronously with pagination support.
     /// </summary>
-    /// <param name="skip">The number of entities to skip.</param>
-    /// <param name="take">The number of entities to take.</param>
+    /// <param name="selector">The selector to apply to the entities.</param>
     /// <param name="filter">Optional. A filter expression to apply to the entities.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
-    Task<IEnumerable<T>> GetByAsync(int skip, int take, Expression<Func<T, bool>>? filter = null);
+    /// <param name="skip">Optional. The number of entities to skip.</param>
+    /// <param name="take">Optional. The number of entities to take.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>  
+    Task<IEnumerable<TProjection>> GetByAsync<TProjection>(Expression<Func<T, TProjection>> selector, Expression<Func<T, bool>>? filter = null, int? skip = null, int? take = null)
+        where TProjection : class;
 
     /// <summary>
     /// Adds a new entity to the repository asynchronously.

@@ -34,16 +34,24 @@ public class AsmtDBContext : DbContext
         modelBuilder.Entity<Order>(entity =>
         {
             SetAtomDefaults(entity);
+            
+            entity.Property(e => e.PricePreTax).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Tax).HasColumnType("decimal(18, 2)");
+
             entity.HasMany(e => e.OrderItems)
                   .WithOne(e => e.Order)
                   .HasForeignKey(e => e.OrderId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Ignore(e => e.Price);
         });
 
         // Configure OrderItem entity
         modelBuilder.Entity<OrderItem>(entity =>
         {
             SetAtomDefaults(entity);
+            
+            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
         });
     }
 
@@ -56,6 +64,6 @@ public class AsmtDBContext : DbContext
     {
         entity.HasKey(e => e.Id);
         entity.Property(e => e.Id).ValueGeneratedOnAdd();
-        entity.Property(e => e.CreateDT).HasDefaultValue(DateTime.UtcNow);
+        entity.Property(e => e.CreateDT).HasDefaultValueSql("(GETUTCDATE())");
     }
 }
