@@ -20,7 +20,12 @@ public enum AsmtExceptionType
     /// <summary>
     /// The exception type for an internal server error.
     /// </summary>
-    InternalServerError
+    InternalServerError,
+
+    /// <summary>
+    /// The exception type for an unauthorized exception.
+    /// </summary>
+    Unauthorized,
 }
 
 /// <summary>

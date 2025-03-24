@@ -38,7 +38,7 @@ public class Order : IAtom
     /// <summary>
     /// Gets the total price of the order including tax.
     /// </summary>
-    public decimal? Price => PricePreTax + Tax;
+    public decimal? Price => PricePreTax + Tax / 100;
 
     /// <summary>
     /// Gets the status of the order.

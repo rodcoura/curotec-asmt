@@ -15,6 +15,7 @@ public class AsmtDBContext : DbContext
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,6 +38,8 @@ public class AsmtDBContext : DbContext
             
             entity.Property(e => e.PricePreTax).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Tax).HasColumnType("decimal(18, 2)");
+            entity.Navigation(e => e.OrderItems).AutoInclude();
+            entity.Navigation(e => e.Customer).AutoInclude();
 
             entity.HasMany(e => e.OrderItems)
                   .WithOne(e => e.Order)
@@ -53,6 +56,14 @@ public class AsmtDBContext : DbContext
             
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
         });
+
+        // Configure User entity
+        modelBuilder.Entity<User>(entity =>
+        {
+            SetAtomDefaults(entity);
+            
+            entity.HasIndex(e => e.Email).IsUnique();
+        }); 
     }
 
     /// <summary>

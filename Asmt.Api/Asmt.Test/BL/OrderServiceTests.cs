@@ -25,7 +25,7 @@ public class OrderServiceTests
     public async Task CreateOrderAsync_ValidOrder_ReturnsCreatedOrder()
     {
         // Arrange
-        var orderDto = new OrderDto
+        OrderDto orderDto = new()
         {
             CustomerId = 1,
             PricePreTax = 100,
@@ -37,7 +37,7 @@ public class OrderServiceTests
             }
         };
 
-        var createdOrder = new Order
+        Order createdOrder = new()
         {
             Id = 1,
             CustomerId = orderDto.CustomerId,
@@ -50,11 +50,11 @@ public class OrderServiceTests
             }
         };
 
-        _mockOrderRepository.Setup(r => r.AddAsync(It.IsAny<Order>()))
+        _mockOrderRepository.Setup(r => r.AddAsync(It.IsAny<Order>(), CancellationToken.None))
             .ReturnsAsync(createdOrder);
 
         // Act
-        var result = await _orderService.CreateOrderAsync(orderDto);
+        OrderDto result = await _orderService.CreateOrderAsync(orderDto);
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -69,7 +69,7 @@ public class OrderServiceTests
     public async Task CreateOrderAsync_InvalidOrder_ThrowsValidationException()
     {
         // Arrange
-        var orderDto = new OrderDto
+        OrderDto orderDto = new()
         {
             CustomerId = 0, // Invalid CustomerId
             PricePreTax = -100, // Invalid PricePreTax
@@ -77,7 +77,7 @@ public class OrderServiceTests
         };
 
         // Act & Assert
-        var ex = Assert.ThrowsAsync<AsmtException>(async () => 
+        AsmtException? ex = Assert.ThrowsAsync<AsmtException>(async () => 
             await _orderService.CreateOrderAsync(orderDto));
         Assert.That(ex.ExceptionType, Is.EqualTo(AsmtExceptionType.ValidationError));
     }
@@ -86,8 +86,8 @@ public class OrderServiceTests
     public async Task GetOrderByIdAsync_ExistingOrder_ReturnsOrder()
     {
         // Arrange
-        var orderId = 1;
-        var order = new Order
+        int orderId = 1;
+        Order order = new()
         {
             Id = orderId,
             CustomerId = 1,
@@ -97,11 +97,11 @@ public class OrderServiceTests
             OrderItems = new List<OrderItem>()
         };
 
-        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId))
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId, CancellationToken.None))
             .ReturnsAsync(order);
 
         // Act
-        var result = await _orderService.GetOrderByIdAsync(orderId);
+        OrderDto result = await _orderService.GetOrderByIdAsync(orderId);
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -112,12 +112,12 @@ public class OrderServiceTests
     public async Task GetOrderByIdAsync_NonExistingOrder_ThrowsNotFoundException()
     {
         // Arrange
-        var orderId = 999;
-        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId))
-            .ReturnsAsync((Order)null);
+        int orderId = 999;
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId, CancellationToken.None))
+            .ReturnsAsync((Order?)null);
 
         // Act & Assert
-        var ex = Assert.ThrowsAsync<AsmtException>(async () => 
+        AsmtException? ex = Assert.ThrowsAsync<AsmtException>(async () => 
             await _orderService.GetOrderByIdAsync(orderId));
         Assert.That(ex.ExceptionType, Is.EqualTo(AsmtExceptionType.NotFound));
     }
@@ -126,57 +126,73 @@ public class OrderServiceTests
     public async Task UpdateOrderAsync_ValidOrder_ReturnsUpdatedOrder()
     {
         // Arrange
-        var orderDto = new OrderDto
+        CancellationToken cancellationToken = default;
+        int orderId = 1;
+
+        Order existingOrder = new()
         {
-            Id = 1,
+            Id = orderId,
+            CustomerId = 1,
+            PricePreTax = 100,
+            Tax = 10,
+            Status = OrderStatusType.Completed,
+            OrderItems = new List<OrderItem>
+            {
+                new() { Id = 1, Price = 75, OrderId = orderId }
+            }
+        };
+
+        OrderDto updatedOrderDto = new()
+        {
+            Id = orderId,
             CustomerId = 1,
             PricePreTax = 150,
             Tax = 15,
             Status = OrderStatusType.Completed,
             OrderItems = new List<OrderItemDto>
             {
-                new() { Id = 1, Price = 75, OrderId = 1 }
+                new() { Id = 1, Price = 75, OrderId = orderId }
             }
         };
 
-        var existingOrder = new Order
+        Order updatedOrder = new()
         {
-            Id = 1,
+            Id = orderId,
             CustomerId = 1,
-            PricePreTax = 100,
-            Tax = 10,
-            Status = OrderStatusType.Pending,
+            PricePreTax = 150,
+            Tax = 15,
+            Status = OrderStatusType.Completed,
             OrderItems = new List<OrderItem>
             {
-                new() { Id = 1, Price = 50, OrderId = 1 }
+                new() { Id = 1, Price = 75, OrderId = orderId }
             }
         };
 
-        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderDto.Id))
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId, cancellationToken))
             .ReturnsAsync(existingOrder);
-        _mockOrderRepository.Setup(r => r.UpdateAsync(It.IsAny<Order>()))
-            .ReturnsAsync((Order order) => order);
+        _mockOrderRepository.Setup(r => r.UpdateAsync(It.IsAny<Order>(), cancellationToken))
+            .ReturnsAsync(updatedOrder);
 
         // Act
-        var result = await _orderService.UpdateOrderAsync(orderDto);
+        OrderDto result = await _orderService.UpdateOrderAsync(updatedOrderDto);
 
         // Assert
         Assert.That(result, Is.Not.Null);
-        Assert.That(result.PricePreTax, Is.EqualTo(orderDto.PricePreTax));
-        Assert.That(result.Tax, Is.EqualTo(orderDto.Tax));
-        Assert.That(result.Status, Is.EqualTo(orderDto.Status));
+        Assert.That(result.PricePreTax, Is.EqualTo(updatedOrder.PricePreTax));
+        Assert.That(result.Tax, Is.EqualTo(updatedOrder.Tax));
+        Assert.That(result.Status, Is.EqualTo(updatedOrder.Status));
     }
 
     [Test]
     public async Task DeleteOrderAsync_ExistingOrder_ReturnsTrue()
     {
         // Arrange
-        var orderId = 1;
-        _mockOrderRepository.Setup(r => r.DeleteAsync(orderId))
+        int orderId = 1;
+        _mockOrderRepository.Setup(r => r.DeleteAsync(orderId, CancellationToken.None))
             .ReturnsAsync(true);
 
         // Act
-        var result = await _orderService.DeleteOrderAsync(orderId);
+        bool result = await _orderService.DeleteOrderAsync(orderId);
 
         // Assert
         Assert.That(result, Is.True);
@@ -186,17 +202,17 @@ public class OrderServiceTests
     public async Task GetAllOrdersAsync_ReturnsAllOrders()
     {
         // Arrange
-        var orders = new List<Order>
+        List<Order> orders = new()
         {
             new() { Id = 1, CustomerId = 1, PricePreTax = 100, Tax = 10 },
             new() { Id = 2, CustomerId = 2, PricePreTax = 200, Tax = 20 }
         };
 
-        _mockOrderRepository.Setup(r => r.GetByAsync(It.IsAny<Expression<Func<Order, Order>>>(), null, null, null))
+        _mockOrderRepository.Setup(r => r.GetByAsync(It.IsAny<Expression<Func<Order, Order>>>(), null, null, null, CancellationToken.None))
             .ReturnsAsync(orders);
 
         // Act
-        var result = await _orderService.GetAllOrdersAsync();
+        IEnumerable<OrderDto> result = await _orderService.GetAllOrdersAsync();
 
         // Assert
         Assert.That(result, Is.Not.Null);

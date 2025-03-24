@@ -65,19 +65,19 @@ public class OrderService : IOrderService
         existingOrder.CustomerId = orderDto.CustomerId;
 
         // Update existing order items and add new ones
-        var existingItemIds = existingOrder.OrderItems.Select(i => i.Id).ToList();
-        var updatedItemIds = orderDto.OrderItems.Where(i => i.Id != 0).Select(i => i.Id).ToList();
+        List<int> existingItemIds = existingOrder.OrderItems.Select(i => i.Id).ToList();
+        List<int> updatedItemIds = orderDto.OrderItems.Where(i => i.Id != 0).Select(i => i.Id).ToList();
 
         // Remove items that are no longer in the updated order
         existingOrder.OrderItems.RemoveAll(item => !updatedItemIds.Contains(item.Id));
 
         // Update existing items and add new ones
-        foreach (var itemDto in orderDto.OrderItems)
+        foreach (OrderItemDto itemDto in orderDto.OrderItems)
         {
             if (itemDto.Id != 0 && existingItemIds.Contains(itemDto.Id))
             {
                 // Update existing item
-                var existingItem = existingOrder.OrderItems.First(i => i.Id == itemDto.Id);
+                OrderItem existingItem = existingOrder.OrderItems.First(i => i.Id == itemDto.Id);
                 existingItem.Price = itemDto.Price;
             }
             else
@@ -91,7 +91,7 @@ public class OrderService : IOrderService
             }
         }
 
-        Order updatedOrder = await _orderRepository.UpdateAsync(existingOrder);
+        Order updatedOrder = await _orderRepository.UpdateAsync(existingOrder, cancellationToken);
         return MapToDto(updatedOrder);
     }
 
@@ -124,6 +124,7 @@ public class OrderService : IOrderService
             Tax = order.Tax,
             Status = order.Status,
             CustomerId = order.CustomerId,
+            CustomerName = order.Customer?.Name,
             OrderItems = order.OrderItems.Select(item => new OrderItemDto
             {
                 Id = item.Id,

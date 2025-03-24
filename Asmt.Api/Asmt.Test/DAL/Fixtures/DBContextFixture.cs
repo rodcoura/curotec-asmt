@@ -16,6 +16,7 @@ public abstract class DBContextFixture
     [TearDown]
     public void TearDown()
     {
+        _context.Database.EnsureDeleted();
         _context.Dispose();
     }
 }

@@ -1,0 +1,85 @@
+<div class="orders-container">
+  <div class="header">
+    <h1>Orders</h1>
+    <button mat-raised-button color="primary" (click)="onAddOrder()">
+      <mat-icon>add</mat-icon>
+      Add Order
+    </button>
+  </div>
+
+  <div class="table-container">
+    <table mat-table [dataSource]="(orders$ | async) || []">
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let order"> {{order.id}} </td>
+      </ng-container>
+
+      <!-- Price Pre Tax Column -->
+      <ng-container matColumnDef="pricePreTax">
+        <th mat-header-cell *matHeaderCellDef> Price Pre Tax </th>
+        <td mat-cell *matCellDef="let order"> {{order.pricePreTax | currency}} </td>
+      </ng-container>
+
+      <!-- Tax Column -->
+      <ng-container matColumnDef="tax">
+        <th mat-header-cell *matHeaderCellDef> Tax </th>
+        <td mat-cell *matCellDef="let order"> {{order.tax | currency}} </td>
+      </ng-container>
+
+      <!-- Total Price Column -->
+      <ng-container matColumnDef="totalPrice">
+        <th mat-header-cell *matHeaderCellDef> Total Price </th>
+        <td mat-cell *matCellDef="let order"> {{order.totalPrice | currency}} </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let order">
+          <span [class]="'status-badge ' + getStatusString(order.status).toLowerCase()">
+            {{getStatusString(order.status)}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Customer ID Column -->
+      <ng-container matColumnDef="customerName">
+        <th mat-header-cell *matHeaderCellDef>Customer</th>
+        <td mat-cell *matCellDef="let order"> {{order.customerName}} </td>
+      </ng-container>
+
+      <!-- Order Items Column -->
+      <ng-container matColumnDef="orderItems">
+        <th mat-header-cell *matHeaderCellDef>Item(s)</th>
+        <td mat-cell *matCellDef="let order"> {{order.orderItems?.length || 0}} </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let order">
+          <button mat-icon-button color="primary" (click)="onEditOrder(order.id)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="onDeleteOrder(order.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- Loading spinner -->
+    <div class="loading-spinner" *ngIf="!(orders$ | async)">
+      <mat-spinner></mat-spinner>
+    </div>
+
+    <!-- No data message -->
+    <div class="no-data" *ngIf="(orders$ | async)?.length === 0">
+      <p>No orders found</p>
+    </div>
+  </div>
+</div>

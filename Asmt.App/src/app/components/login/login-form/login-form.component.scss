@@ -1,0 +1,32 @@
+.login-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+mat-card-header {
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+mat-card-title {
+  font-size: 24px;
+}
+
+button[type="submit"] {
+  margin-top: 16px;
+  padding: 8px 0;
+}

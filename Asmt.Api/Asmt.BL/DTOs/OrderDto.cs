@@ -27,7 +27,7 @@ public class OrderDto
     /// <summary>
     /// The total price of the order including tax.
     /// </summary>
-    public decimal? TotalPrice => PricePreTax + Tax;
+    public decimal? TotalPrice => PricePreTax + Tax / 100;
 
     /// <summary>
     /// The status of the order.
@@ -38,6 +38,11 @@ public class OrderDto
     /// The identifier of the customer who placed the order.
     /// </summary>
     public int CustomerId { get; set; }
+
+    /// <summary>
+    /// The Customer Name
+    /// </summary>
+    public string? CustomerName { get; set; }
 
     /// <summary>
     /// The collection of items included in this order.

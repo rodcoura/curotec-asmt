@@ -1,0 +1,115 @@
+<form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="order-form">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ orderId ? 'Edit Order' : 'New Order' }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Customer</mat-label>
+          <mat-select formControlName="customerId">
+            <mat-option *ngFor="let customer of customers$ | async" [value]="customer.id">
+              {{customer.name}}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="orderForm.get('customerId')?.hasError('required')">
+            Customer is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option [value]="OrderStatusType.Pending">Pending</mat-option>
+            <mat-option [value]="OrderStatusType.Completed">Completed</mat-option>
+            <mat-option [value]="OrderStatusType.Cancelled">Cancelled</mat-option>
+          </mat-select>
+          <mat-error *ngIf="orderForm.get('status')?.hasError('required')">
+            Status is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Price Pre-Tax</mat-label>
+          <span matPrefix>$&nbsp;</span>
+          <input matInput type="number" formControlName="pricePreTax">
+          <mat-error *ngIf="orderForm.get('pricePreTax')?.hasError('required')">
+            Price is required
+          </mat-error>
+          <mat-error *ngIf="orderForm.get('pricePreTax')?.hasError('min')">
+            Price must be greater than 0
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tax %</mat-label>
+          <input matInput type="number" formControlName="tax">
+          <mat-error *ngIf="orderForm.get('tax')?.hasError('required')">
+            Tax is required
+          </mat-error>
+          <mat-error *ngIf="orderForm.get('tax')?.hasError('min')">
+            Tax must be greater than 0
+          </mat-error>
+          <mat-error *ngIf="orderForm.get('tax')?.hasError('max')">
+            Tax must be less or equal than 100
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Total Price</mat-label>
+          <span matPrefix>$&nbsp;</span>
+          <input matInput type="number" formControlName="totalPrice">
+          <mat-error *ngIf="orderForm.get('totalPrice')?.hasError('required')">
+            Total price is required
+          </mat-error>
+          <mat-error *ngIf="orderForm.get('totalPrice')?.hasError('min')">
+            Total price must be greater than 0
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div formArrayName="orderItems" class="order-items">
+        <div class="order-items-header">
+          <h3>Order Items</h3>
+          <button mat-raised-button color="primary" type="button" (click)="addOrderItem()">
+            <mat-icon>add</mat-icon>
+            Add Item
+          </button>
+        </div>
+
+        <div *ngFor="let item of orderItems.controls; let i=index" [formGroupName]="i" class="order-item">
+          <mat-form-field appearance="outline">
+            <mat-label>Item Price</mat-label>
+            <span matPrefix>$&nbsp;</span>
+            <input matInput type="number" formControlName="price">
+            <mat-error *ngIf="item.get('price')?.hasError('required')">
+              Price is required
+            </mat-error>
+            <mat-error *ngIf="item.get('price')?.hasError('min')">
+              Price must be greater than 0
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-icon-button color="warn" type="button" (click)="removeOrderItem(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="error$ | async as error" class="error-message">
+        <mat-error>{{ error }}</mat-error>
+      </div>
+
+      <div class="form-actions">
+        <button mat-button type="button" (click)="goBack()">Go Back</button>
+        <button *ngIf="!orderId" mat-button type="button" (click)="clearForm()">Clear</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!orderForm.valid">
+          {{ orderId ? 'Update' : 'Save' }}
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
